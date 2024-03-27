@@ -42,7 +42,7 @@ const useAuth = () => {
     return () => unsubscribe(); // Cleanup on unmount
   }, []);
 
-  return { isAuthenticated, isLoading, user };
+  return { isAuthenticated, isLoading, user, profile };
 };
 
 const ProtectedRoute = () => {

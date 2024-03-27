@@ -1,28 +1,18 @@
-# REACT STARTER WITH PROTECTED ROUTES
+# REACT FIREBASE STARTER WITH PROTECTED ROUTES
 
 ## Getting Started
 
-You can use this frontend and the [backend](https://github.com/10-3-pursuit/auth-express-login) repo as starters for a full stack project that will include login
-
-**Steps:**
-
-- Create a parent folder
-- `fork` both repos
-  - [frontend](<(https://github.com/10-3-pursuit/auth-react-login)>)
-  - [backend](https://github.com/10-3-pursuit/auth-express-login)
-- `clone` both forked repos into the parent folder
-- Use the `env.example` in the backend to set up your postgresql database
-- Postgresql tables have been included in `db/schema.sql` to define the user.
-- If you want the user to have extra fields you must update the schema and update the `db/seed.sql` files properly.
-- There are commented areas in the code where you must replace things such as the database name etc.
+You can use this frontend as the starter to your repo to create a frontend application that uses firebase for login and registration as well as firestore for the database.
 
 ## Demo User
 
 On the Login page (component) there is a `DemoUser` button where the login functionality has been already created. It runs a function that logs in using the credentials of a seeded user called `demo` that has a password of `password` which you can see in the `handleDemoSignIn` function in `Login.jsx`.
 
+In order to use the Demo User, you must enter the user information in the Cloud Firestore database.
+
 ## Security
 
-Most of the security is being handled on the backend. But there are two pieces that are also used on the frontend as well in this app.
+Firebase will handle the login and registration of users as well as the authentication of users.
 
 #### ProtectedRoute Component
 
@@ -56,19 +46,19 @@ For every form, you will need to include CSRF credentials. You will need to add 
 
 ```js
 const csrfToken = document.cookie
-  .split('; ')
-  .find((row) => row.startsWith('XSRF-TOKEN='))
-  .split('=')[1] // Extract CSRF token from cookies
+  .split("; ")
+  .find((row) => row.startsWith("XSRF-TOKEN="))
+  .split("=")[1]; // Extract CSRF token from cookies
 
 const options = {
-  method: 'POST', // could be PUT
+  method: "POST", // could be PUT
   headers: {
-    'Content-Type': 'application/json',
-    'CSRF-Token': csrfToken, // Include CSRF token in request headers
+    "Content-Type": "application/json",
+    "CSRF-Token": csrfToken, // Include CSRF token in request headers
   },
-  credentials: 'include', // Important: Include cookies in the request
+  credentials: "include", // Important: Include cookies in the request
   body: JSON.stringify(user),
-}
+};
 ```
 
 <hr />
