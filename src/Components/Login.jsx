@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-const URL = import.meta.env.VITE_BASE_URL;
+
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebaseConfig";
+
 const Login = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState({ username: "", password: "" });
@@ -10,64 +13,31 @@ const Login = () => {
   }
   // This function is being used in two places. It can be extracted to a helpers.js file
 
-  async function postFetch(user) {
-    const csrfToken = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("XSRF-TOKEN="))
-      .split("=")[1]; // Extract CSRF token from cookies
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "CSRF-Token": csrfToken, // Include CSRF token in request headers
-      },
-      credentials: "include", // Important: Include cookies in the request
-      body: JSON.stringify(user),
-    };
-
-    try {
-      const res = await fetch(`${URL}/api/auth/login`, options);
-      if (!res.ok) {
-        alert("Login failed");
-        setUser({ username: "", password: "" });
-        throw new Error("Registration failed");
-      }
-
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Error during registration:", error);
-    }
-  }
-
   // Login Function
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!user.username || !user.password) {
-      alert("You must enter a username and password");
-      return;
-    }
 
-    postFetch(user);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/dashboard"); // Adjust the route as necessary
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Failed to log in");
+    }
   }
 
   //Demo User Login Function
   async function handleDemoSignIn(e) {
     e.preventDefault();
-    const user = { username: "demo", password: "password" };
-    postFetch(user);
+    const user = { email: "demo@me.com", password: "password" };
+    try {
+      await signInWithEmailAndPassword(auth, user.email, user.password);
+      navigate("/dashboard"); // Adjust the route as necessary
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Failed to log in");
+    }
   }
-  useEffect(() => {
-    // Fetch call to the root route of your backend to get the CSRF token
-    fetch(`${URL}`, {
-      credentials: "include", // Important: Include cookies in the request
-    })
-      .then((response) => {
-        if (response.ok) {
-          console.log("XSRF-Token cookie should now be set.");
-        }
-      })
-      .catch((error) => console.error("Error fetching CSRF token:", error));
-  }, []);
 
   // BUILD OUT YOUR FORM PROPERLY WITH LABELS AND WHATEVER CSS FRAMEWORK YOU MAY USE OR VANILLA CSS. THIS IS JUST A BOILERPLATE
 
@@ -81,14 +51,15 @@ const Login = () => {
       <br />
       <h4>Login</h4>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="username">
+        <label htmlFor="email">
           <input
-            id="username"
-            value={user.username}
-            type="text"
-            placeholder="username"
-            autoComplete="username"
+            id="email"
+            value={user.email}
+            type="email"
+            placeholder="email"
+            autoComplete="email"
             onChange={handleChange}
+            required
           />
         </label>
         <br />
@@ -100,6 +71,7 @@ const Login = () => {
             placeholder="password"
             onChange={handleChange}
             autoComplete="current-password"
+            required
           />
         </label>
         <br />

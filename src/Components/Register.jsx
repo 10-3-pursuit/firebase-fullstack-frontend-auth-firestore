@@ -1,39 +1,37 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
-const URL = import.meta.env.VITE_BASE_URL
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig"; // Ensure you import your Firestore instance
 
 const Register = () => {
-  const navigate = useNavigate()
-  const [user, setUser] = useState({ username: '', password: '', email: '' })
+  const navigate = useNavigate();
+  const [user, setUser] = useState({ username: "", password: "", email: "" });
 
   function handleChange(event) {
-    setUser({ ...user, [event.target.id]: event.target.value })
+    setUser({ ...user, [event.target.id]: event.target.value });
   }
 
   async function handleSubmit(e) {
-    e.preventDefault()
-    const csrfToken = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('XSRF-TOKEN='))
-      .split('=')[1] // Extract CSRF token from cookies
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'CSRF-Token': csrfToken, // Include CSRF token in request headers
-      },
-      credentials: 'include', // Important: Include cookies in the request
-      body: JSON.stringify(user),
-    }
-
+    e.preventDefault();
     try {
-      const res = await fetch(`${URL}/api/auth/register`, options)
-      if (!res.ok) throw new Error('Registration failed')
-
-      navigate('/dashboard') // Navigate to /dashboard on success
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        user.email,
+        user.password
+      );
+      const user = userCredential.user;
+      // Now, store the additional information in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        username: user.username,
+        // Add other fields as needed
+      });
+      // Navigate to dashboard or show success message
+      navigate("/dashboard");
     } catch (error) {
-      console.error('Error during registration:', error)
+      console.error("Registration error:", error);
+      alert("Failed to register");
     }
   }
 
@@ -51,6 +49,7 @@ const Register = () => {
             placeholder="username"
             onChange={handleChange}
             autoComplete="username"
+            required
           />
         </label>
         <br />
@@ -63,6 +62,7 @@ const Register = () => {
             placeholder="email"
             onChange={handleChange}
             autoComplete="email"
+            required
           />
         </label>
         <br />
@@ -74,6 +74,7 @@ const Register = () => {
             placeholder="password"
             onChange={handleChange}
             autoComplete="current-password"
+            required
           />
         </label>
         <br />
@@ -83,7 +84,7 @@ const Register = () => {
         Already have an account? <Link to="/login">Login</Link>
       </p>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;

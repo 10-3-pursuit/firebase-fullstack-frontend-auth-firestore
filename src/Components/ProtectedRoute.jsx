@@ -1,45 +1,52 @@
 // src/components/ProtectedRoute.jsx
 import { useState, useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-const URL = import.meta.env.VITE_BASE_URL;
+
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig";
+
+async function fetchUserProfile(uid) {
+  const docRef = doc(db, "users", uid);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    return docSnap.data(); // Returns the additional fields stored in Firestore
+  } else {
+    console.log("No such document!");
+    return null;
+  }
+}
 
 const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState();
+  const [profile, setProfile] = useState(null); // State to hold additional user info
 
   useEffect(() => {
-    const checkAuth = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${URL}/api/auth/check-auth`, {
-          credentials: "include", // Important: Include cookies in the request
-        });
-        if (response.ok) {
-          const data = await response.json();
-
-          setIsAuthenticated(data.isAuthenticated);
-          setUser(data.user);
-          setIsLoading(false);
-        } else {
-          setIsLoading(false);
-          setIsAuthenticated(false);
-        }
-      } catch (error) {
-        console.error("Error checking authentication:", error);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+        setUser(user);
+        const userProfile = await fetchUserProfile(user.uid);
+        setProfile(userProfile); // Set the additional user info
+      } else {
         setIsAuthenticated(false);
-        setIsLoading(false);
+        setUser(null);
+        setProfile(null); // Clear the additional user info
       }
-    };
+      setIsLoading(false);
+    });
 
-    checkAuth();
+    return () => unsubscribe(); // Cleanup on unmount
   }, []);
 
   return { isAuthenticated, isLoading, user };
 };
 
 const ProtectedRoute = () => {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, profile } = useAuth();
   if (isLoading) {
     return (
       <div>
@@ -56,7 +63,7 @@ const ProtectedRoute = () => {
     return <Navigate to="/login" replace />;
   }
 
-  return <Outlet context={{ user }} />; // If authenticated, continue rendering the component the route is pointing to
+  return <Outlet context={{ user, profile }} />; // If authenticated, continue rendering the component the route is pointing to
 };
 
 export default ProtectedRoute;
