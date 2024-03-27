@@ -1,4 +1,4 @@
-# React User Login Starter w Protected Routes
+# React User Login Firebase Starter w Protected Routes
 
 Your Readme for your project goes here
 
