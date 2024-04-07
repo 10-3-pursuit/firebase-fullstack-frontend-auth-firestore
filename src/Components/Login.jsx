@@ -61,6 +61,7 @@ const Login = ({ setUser }) => {
   // BUILD OUT YOUR FORM PROPERLY WITH LABELS AND WHATEVER CSS FRAMEWORK YOU MAY USE OR VANILLA CSS. THIS IS JUST A BOILERPLATE
 
   return (
+    // remove this styling
     <div style={{ marginTop: 100, textAlign: "center" }}>
       <h2>Use the DemoUser button to login and save time during demo</h2>
       <h3> Remove the 'br' tags and these instructions if you use this code</h3>

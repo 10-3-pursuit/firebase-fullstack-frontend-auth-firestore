@@ -8,6 +8,7 @@ import Dashboard from "./Components/Dashboard";
 import NavBar from "./Components/NavBar";
 import { signOut } from "firebase/auth";
 import { auth } from "./firebaseConfig";
+import LandingPage from "./Components/LandingPage";
 
 function App() {
   const navigate = useNavigate();
@@ -28,19 +29,7 @@ function App() {
     <>
       <NavBar handleLogout={handleLogout} user={user} />
       <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              <h1>Welcome to the Auth Starter</h1>
-              <Link to="/login">Login</Link>
-              <h2>
-                If you are not logged in you cannot reach this route. Try!
-              </h2>
-              <Link to="/dashboard">Dashboard</Link>
-            </div>
-          }
-        />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/register" element={<Register setUser={setUser} />} />
 

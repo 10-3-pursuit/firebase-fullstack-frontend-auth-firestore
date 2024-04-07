@@ -61,6 +61,7 @@ const Register = ({ setUser }) => {
   // BUILD OUT YOUR FORM PROPERLY WITH LABELS AND WHATEVER CSS FRAMEWORK YOU MAY USE OR VANILLA CSS. THIS IS JUST A BOILERPLATE
 
   return (
+    // remove this styling
     <div style={{ marginTop: 100, textAlign: "center" }}>
       <h1>Register</h1>
       <form onSubmit={handleSubmit}>

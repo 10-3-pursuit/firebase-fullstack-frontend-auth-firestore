@@ -4,7 +4,16 @@ const Dashboard = ({ handleLogout }) => {
   const { user } = useOutletContext();
 
   return (
-    <div>
+    <div
+      // remove this styling
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+      }}
+    >
       <h1>Welcome, {user && user.username.toUpperCase()}</h1>
       <h3>This is a ProtectedRoute Component called Dashboard</h3>
 

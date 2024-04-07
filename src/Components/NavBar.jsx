@@ -2,9 +2,10 @@ import { Link } from "react-router-dom";
 
 const Navbar = ({ handleLogout, user }) => {
   return (
-    <div className="navbar-container">
+    <div>
       <h1>Navbar Component</h1>
       <h2>
+        {/* remove this styling */}
         <Link style={{ textDecoration: "none" }} to="/">
           Your image or Logo (click here to go to Landing Page)
         </Link>
