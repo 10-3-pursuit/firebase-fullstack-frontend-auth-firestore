@@ -6,13 +6,7 @@ const Dashboard = ({ handleLogout }) => {
   return (
     <div
       // remove this styling
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-      }}
+      style={{ marginTop: 100, textAlign: "center" }}
     >
       <h1>Welcome, {user && user.username.toUpperCase()}</h1>
       <h3>This is a ProtectedRoute Component called Dashboard</h3>
