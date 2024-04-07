@@ -3,32 +3,55 @@ import { useNavigate, Link } from "react-router-dom";
 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebaseConfig"; // Ensure you import your Firestore instance
+import { auth, db } from "../firebaseConfig";
 
-const Register = () => {
+const URL = import.meta.env.VITE_BASE_URL;
+
+const Register = ({ setUser }) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState({ username: "", password: "", email: "" });
+  const [userReg, setUserReg] = useState({
+    username: "",
+    password: "",
+    email: "",
+  });
 
   function handleChange(event) {
-    setUser({ ...user, [event.target.id]: event.target.value });
+    setUserReg({ ...userReg, [event.target.id]: event.target.value });
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      const userCredential = await createUserWithEmailAndPassword(
+      const firebaseUser = await createUserWithEmailAndPassword(
         auth,
-        user.email,
-        user.password
+        userReg.email,
+        userReg.password
       );
-      const user = userCredential.user;
-      // Now, store the additional information in Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        username: user.username,
-        // Add other fields as needed
+
+      // Now, store the additional information in Firestore, not required
+      await setDoc(doc(db, "users", firebaseUser.user.uid), {
+        username: userReg.username,
       });
-      // Navigate to dashboard or show success message
-      navigate("/dashboard");
+
+      const response = await fetch(`${URL}/api/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: firebaseUser.user.uid,
+          email: userReg.email,
+          username: userReg.username,
+        }),
+      });
+
+      const newUser = await response.json();
+
+      if (!response.ok) throw new Error("Failed to register user in backend");
+      else {
+        await setUser(newUser);
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error("Registration error:", error);
       alert("Failed to register");
@@ -38,13 +61,13 @@ const Register = () => {
   // BUILD OUT YOUR FORM PROPERLY WITH LABELS AND WHATEVER CSS FRAMEWORK YOU MAY USE OR VANILLA CSS. THIS IS JUST A BOILERPLATE
 
   return (
-    <div>
+    <div style={{ marginTop: 100, textAlign: "center" }}>
       <h1>Register</h1>
       <form onSubmit={handleSubmit}>
         <label htmlFor="username">
           <input
             id="username"
-            value={user.username}
+            value={userReg.username}
             type="text"
             placeholder="username"
             onChange={handleChange}
@@ -57,7 +80,7 @@ const Register = () => {
         <label htmlFor="email">
           <input
             id="email"
-            value={user.email}
+            value={userReg.email}
             type="email"
             placeholder="email"
             onChange={handleChange}
@@ -69,7 +92,7 @@ const Register = () => {
         <label htmlFor="password">
           <input
             id="password"
-            value={user.password}
+            value={userReg.password}
             type="password"
             placeholder="password"
             onChange={handleChange}

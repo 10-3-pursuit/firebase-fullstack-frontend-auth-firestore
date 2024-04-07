@@ -22,31 +22,36 @@ const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState();
-  const [profile, setProfile] = useState(null); // State to hold additional user info
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setIsAuthenticated(true);
-        setUser(user);
+
         const userProfile = await fetchUserProfile(user.uid);
-        setProfile(userProfile); // Set the additional user info
+
+        const combinedUserInfo = {
+          uid: user.uid,
+          email: user.email,
+          ...userProfile,
+        };
+
+        setUser(combinedUserInfo);
       } else {
         setIsAuthenticated(false);
         setUser(null);
-        setProfile(null); // Clear the additional user info
       }
       setIsLoading(false);
     });
 
-    return () => unsubscribe(); // Cleanup on unmount
+    return () => unsubscribe();
   }, []);
 
-  return { isAuthenticated, isLoading, user, profile };
+  return { isAuthenticated, isLoading, user };
 };
 
 const ProtectedRoute = () => {
-  const { isAuthenticated, isLoading, user, profile } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   if (isLoading) {
     return (
       <div>
@@ -56,14 +61,11 @@ const ProtectedRoute = () => {
   }
 
   if (!isAuthenticated) {
-    // Redirect them to the /login page, but save the current location they were
-    // trying to go to when they were redirected. This allows us to send them
-    // along to that page after they login, which is a nicer user experience
-    // than dropping them off on the home page.
+    console.log("hello auth");
     return <Navigate to="/login" replace />;
   }
 
-  return <Outlet context={{ user, profile }} />; // If authenticated, continue rendering the component the route is pointing to
+  return <Outlet context={{ user }} />; // If authenticated, continue rendering the component the route is pointing to
 };
 
 export default ProtectedRoute;

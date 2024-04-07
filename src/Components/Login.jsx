@@ -3,23 +3,43 @@ import { useNavigate, Link } from "react-router-dom";
 
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebaseConfig";
+import { fetchUserInfo } from "./helpers/fetchUser";
 
-const Login = () => {
+const Login = ({ setUser }) => {
   const navigate = useNavigate();
-  const [user, setUser] = useState({ username: "", password: "" });
+  const [loginUser, setLoginUser] = useState({ email: "", password: "" });
 
   function handleChange(event) {
-    setUser({ ...user, [event.target.id]: event.target.value });
+    setLoginUser({ ...loginUser, [event.target.id]: event.target.value });
   }
   // This function is being used in two places. It can be extracted to a helpers.js file
+
+  async function handleLogin(e, email, password) {
+    e.preventDefault();
+
+    try {
+      const fireBaseUser = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const data = await fetchUserInfo(fireBaseUser.user);
+      console.log("data", data);
+      await setUser(data);
+
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Failed to log in");
+    }
+  }
 
   // Login Function
   async function handleSubmit(e) {
     e.preventDefault();
-
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard"); // Adjust the route as necessary
+      const { email, password } = loginUser;
+      await handleLogin(e, email, password);
     } catch (error) {
       console.error("Login error:", error);
       alert("Failed to log in");
@@ -31,8 +51,7 @@ const Login = () => {
     e.preventDefault();
     const user = { email: "demo@me.com", password: "password" };
     try {
-      await signInWithEmailAndPassword(auth, user.email, user.password);
-      navigate("/dashboard"); // Adjust the route as necessary
+      await handleLogin(e, user.email, user.password);
     } catch (error) {
       console.error("Login error:", error);
       alert("Failed to log in");
@@ -42,7 +61,7 @@ const Login = () => {
   // BUILD OUT YOUR FORM PROPERLY WITH LABELS AND WHATEVER CSS FRAMEWORK YOU MAY USE OR VANILLA CSS. THIS IS JUST A BOILERPLATE
 
   return (
-    <div>
+    <div style={{ marginTop: 100, textAlign: "center" }}>
       <h2>Use the DemoUser button to login and save time during demo</h2>
       <h3> Remove the 'br' tags and these instructions if you use this code</h3>
       <button onClick={handleDemoSignIn}>Demo User</button>
@@ -54,7 +73,7 @@ const Login = () => {
         <label htmlFor="email">
           <input
             id="email"
-            value={user.email}
+            value={loginUser.email}
             type="email"
             placeholder="email"
             autoComplete="email"
@@ -66,7 +85,7 @@ const Login = () => {
         <label htmlFor="password">
           <input
             id="password"
-            value={user.password}
+            value={loginUser.password}
             type="password"
             placeholder="password"
             onChange={handleChange}
