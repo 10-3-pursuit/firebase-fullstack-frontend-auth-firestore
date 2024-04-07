@@ -10,8 +10,9 @@ async function fetchUserProfile(uid) {
   const docRef = doc(db, "users", uid);
   const docSnap = await getDoc(docRef);
 
+  //check if the user exists in the firebase database
   if (docSnap.exists()) {
-    return docSnap.data(); // Returns the additional fields stored in Firestore
+    return docSnap.data();
   } else {
     console.log("No such document!");
     return null;

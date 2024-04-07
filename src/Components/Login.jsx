@@ -23,9 +23,9 @@ const Login = ({ setUser }) => {
         email,
         password
       );
-      const data = await fetchUserInfo(fireBaseUser.user);
-      console.log("data", data);
-      await setUser(data);
+      const userInfo = await fetchUserInfo(fireBaseUser.user);
+
+      await setUser(userInfo);
 
       navigate("/dashboard");
     } catch (error) {
